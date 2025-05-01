@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Professional Income & Expense Tracker</title>
+
+<style>
+
+  body {
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    background: #f4f7fa;
+
+    margin: 0;
+
+    padding: 0;
+
+    color: #333;
+
+  }
+
+  header {
+
+    background: #007bff;
+
+    padding: 1rem;
+
+    color: white;
+
+    text-align: center;
+
+  }
+
+  main {
+
+    max-width: 960px;
+
+    margin: 1rem auto 3rem;
+
+    background: white;
+
+    border-radius: 8px;
+
+    padding: 1.5rem 2rem 2rem;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  }
+
+  form {
+
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+
+    gap: 1rem 1.5rem;
+
+    margin-bottom: 1.5rem;
+
+    align-items: end;
+
+  }
+
+  label {
+
+    font-weight: 600;
+
+    font-size: 0.9rem;
+
+    display: block;
+
+    margin-bottom: 0.3rem;
+
+  }
+
+  input, select, button {
+
+    font-size: 1rem;
+
+    padding: 0.4rem 0.6rem;
+
+    border: 1px solid #ccc;
+
+    border-radius: 4px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+  }
+
+  button {
+
+    background: #007bff;
+
+    color: white;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+    max-width: 140px;
+
+    justify-self: start;
+
+    transition: background 0.3s ease;
+
+  }
+
+  button:hover {
+
+    background: #0056b3;
+
+  }
+
+  table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 0.95rem;
+
+    margin-top: 1rem;
+
+  }
+
+  thead {
+
+    background: #007bff;
+
+    color: white;
+
+  }
+
+  th, td {
+
+    padding: 0.6rem 0.8rem;
+
+    border: 1px solid #ddd;
+
+    text-align: left;
+
+  }
+
+  tbody tr:nth-child(even) {
+
+    background: #f9fafb;
+
+  }
+
+  .summary {
+
+    margin-top: 2rem;
+
+  }
+
+  .summary h2 {
+
+    margin-bottom: 0.5rem;
+
+  }
+
+  .summary ul {
+
+    list-style: none;
+
+    padding-left: 0;
+
+    max-width: 400px;
+
+  }
+
+  .summary li {
+
+    padding: 0.3rem 0;
+
+    font-weight: 600;
+
+    border-bottom: 1px solid #eee;
+
+    display: flex;
+
+    justify-content: space-between;
+
+  }
+
+  .no-transactions {
+
+    margin-top: 1rem;
+
+    font-style: italic;
+
+    color: #666;
+
+    text-align: center;
+
+  }
+
+  .import-export {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 1rem;
+
+    margin-bottom: 1rem;
+
+    flex-wrap: wrap;
+
+  }
+
+  .import-export button {
+
+    max-width: 180px;
+
+  }
+
+  /* Responsive */
+
+  @media (max-width: 500px) {
+
+    form {
+
+      grid-template-columns: 1fr;
+
+      align-items: stretch;
+
+    }
+
+    button {
+
+      max-width: 100%;
+
+      justify-self: stretch;
+
+    }
+
+    .import-export {
+
+      justify-content: center;
+
+    }
+
+  }
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+  <h1>Professional Income & Expense Tracker</h1>
+
+</header>
+
+<main>
+
+  <form id="transaction-form" aria-label="Add new transaction">
+
+    <div>
+
+      <label for="date-input">Date</label>
+
+      <input type="date" id="date-input" name="date" required />
+
+    </div>
+
+    <div>
+
+      <label for="type-input">Type</label>
+
+      <select id="type-input" name="type" required aria-required="true">
+
+        <option value="" disabled selected>Select Type</option>
+
+        <option value="Income">Income</option>
+
+        <option value="Expense">Expense</option>
+
+      </select>
+
+    </div>
+
+    <div>
+
+      <label for="category-input">Category</label>
+
+      <input list="categories-list" id="category-input" name="category" placeholder="Select or enter category" required />
+
+      <datalist id="categories-list">
+
+        <!-- Categories populated dynamically -->
+
+      </datalist>
+
+    </div>
+
+    <div>
+
+      <label for="item-input">Item Name</label>
+
+      <input type="text" id="item-input" name="item" placeholder="Enter item name" required />
+
+    </div>
+
+    <div>
+
+      <label for="amount-input">Amount (USD)</label>
+
+      <input type="number" id="amount-input" name="amount" step="0.01" min="0.01" placeholder="0.00" required/>
+
+    </div>
+
+    <div>
+
+      <button type="submit" title="Add Transaction">Add Transaction</button>
+
+    </div>
+
+  </form>
+
+
+  <div class="import-export">
+
+    <button id="download-btn" title="Download CSV of transactions">Download Transactions CSV</button>
+
+    <button id="clear-btn" title="Clear all transactions">Clear All</button>
+
+  </div>
+
+
+  <section aria-label="Transaction List">
+
+    <h2>Transactions</h2>
+
+    <table id="transactions-table" aria-live="polite" aria-describedby="transactions-desc">
+
+      <caption id="transactions-desc" class="sr-only">List of all added transactions</caption>
+
+      <thead>
+
+        <tr>
+
+          <th scope="col" data-sort="date" title="Sort by date">Date &#x25B2;&#x25BC;</th>
+
+          <th scope="col" data-sort="type" title="Sort by type">Type &#x25B2;&#x25BC;</th>
+
+          <th scope="col" data-sort="category" title="Sort by category">Category &#x25B2;&#x25BC;</th>
+
+          <th scope="col" data-sort="item" title="Sort by item name">Item</th>
+
+          <th scope="col" data-sort="amount" title="Sort by amount">Amount (USD)</th>
+
+          <th scope="col" title="Delete transaction">Delete</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="transaction-tbody">
+
+        <!-- Transactions rows inserted here -->
+
+      </tbody>
+
+    </table>
+
+    <p id="no-transactions-msg" class="no-transactions" hidden>No transactions recorded yet.</p>
+
+  </section>
+
+
+  <section class="summary" aria-label="Summary">
+
+    <h2>Summary</h2>
+
+    <ul id="overall-summary-list">
+
+      <!-- Overall income, expense, balance -->
+
+    </ul>
+
+
+    <h2>Summary by Category & Type</h2>
+
+    <ul id="category-summary-list">
+
+      <!-- Category summary inserted here -->
+
+    </ul>
+
+  </section>
+
+</main>
+
+
+<script>
+
+  (function() {
+
+    const STORAGE_KEY = 'income-expense-tracker-transactions';
+
+
+    // Elements
+
+    const form = document.getElementById('transaction-form');
+
+    const dateInput = document.getElementById('date-input');
+
+    const typeInput = document.getElementById('type-input');
+
+    const categoryInput = document.getElementById('category-input');
+
+    const categoriesList = document.getElementById('categories-list');
+
+    const itemInput = document.getElementById('item-input');
+
+    const amountInput = document.getElementById('amount-input');
+
+    const tbody = document.getElementById('transaction-tbody');
+
+    const noTransactionsMsg = document.getElementById('no-transactions-msg');
+
+    const categorySummaryList = document.getElementById('category-summary-list');
+
+    const overallSummaryList = document.getElementById('overall-summary-list');
+
+    const downloadBtn = document.getElementById('download-btn');
+
+    const clearBtn = document.getElementById('clear-btn');
+
+    const table = document.getElementById('transactions-table');
+
+
+    let transactions = [];
+
+    let currentSort = { column: 'date', ascending: true };
+
+
+    function init() {
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+
+      if (stored) {
+
+        try {
+
+          transactions = JSON.parse(stored);
+
+        } catch (e) {
+
+          transactions = [];
+
+        }
+
+      }
+
+      renderCategories();
+
+      renderTransactions();
+
+      renderSummary();
+
+    }
+
+
+    function saveTransactions() {
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+
+    }
+
+
+    // Unique categories from all transactions regardless of type
+
+    function renderCategories() {
+
+      const categories = Array.from(new Set(transactions.map(t => t.category.trim()).filter(c => c))).sort((a,b) => a.localeCompare(b));
+
+      categoriesList.innerHTML = '';
+
+      for (const cat of categories) {
+
+        const option = document.createElement('option');
+
+        option.value = cat;
+
+        categoriesList.appendChild(option);
+
+      }
+
+    }
+
+
+    function renderTransactions() {
+
+      tbody.innerHTML = '';
+
+      if(transactions.length === 0){
+
+        noTransactionsMsg.hidden = false;
+
+        table.hidden = true;
+
+        return;
+
+      }
+
+      noTransactionsMsg.hidden = true;
+
+      table.hidden = false;
+
+
+      let sorted = [...transactions];
+
+      sorted.sort((a,b) => {
+
+        let valA = a[currentSort.column];
+
+        let valB = b[currentSort.column];
+
+        if(currentSort.column === 'amount'){
+
+          valA = parseFloat(valA);
+
+          valB = parseFloat(valB);
+
+        } else if(currentSort.column === 'date'){
+
+          valA = new Date(valA);
+
+          valB = new Date(valB);
+
+        } else {
+
+          valA = valA.toString().toLowerCase();
+
+          valB = valB.toString().toLowerCase();
+
+        }
+
+        if(valA < valB) return currentSort.ascending ? -1 : 1;
+
+        if(valA > valB) return currentSort.ascending ? 1 : -1;
+
+        return 0;
+
+      });
+
+
+      for (const t of sorted) {
+
+        const tr = document.createElement('tr');
+
+
+        const tdDate = document.createElement('td');
+
+        tdDate.textContent = t.date;
+
+        tr.appendChild(tdDate);
+
+
+        const tdType = document.createElement('td');
+
+        tdType.textContent = t.type;
+
+        tdType.style.fontWeight = "600";
+
+        tdType.style.color = (t.type === 'Income') ? 'green' : 'crimson';
+
+        tr.appendChild(tdType);
+
+
+        const tdCategory = document.createElement('td');
+
+        tdCategory.textContent = t.category;
+
+        tr.appendChild(tdCategory);
+
+
+        const tdItem = document.createElement('td');
+
+        tdItem.textContent = t.item;
+
+        tr.appendChild(tdItem);
+
+
+        const tdAmount = document.createElement('td');
+
+        tdAmount.textContent = parseFloat(t.amount).toFixed(2);
+
+        tdAmount.style.textAlign = "right";
+
+        tdAmount.style.color = (t.type === 'Income') ? 'green' : 'crimson';
+
+        tr.appendChild(tdAmount);
+
+
+        const tdDelete = document.createElement('td');
+
+        const delBtn = document.createElement('button');
+
+        delBtn.textContent = '🗑';
+
+        delBtn.setAttribute('aria-label', `Delete transaction ${t.item} on ${t.date}, type ${t.type}, category ${t.category}, amount ${t.amount}`);
+
+        delBtn.title = 'Delete transaction';
+
+        delBtn.style.cursor = 'pointer';
+
+        delBtn.style.border = 'none';
+
+        delBtn.style.background = 'none';
+
+        delBtn.style.fontSize = '1.1rem';
+
+        delBtn.addEventListener('click', () => {
+
+          deleteTransaction(t);
+
+        });
+
+        tdDelete.appendChild(delBtn);
+
+        tdDelete.style.textAlign = 'center';
+
+        tr.appendChild(tdDelete);
+
+
+        tbody.appendChild(tr);
+
+      }
+
+    }
+
+
+    // Summary includes total income, expense, balance, and category-wise by type
+
+    function renderSummary() {
+
+      let totalIncome = 0;
+
+      let totalExpense = 0;
+
+      const breakdown = {}; // { category: { Income: x, Expense: y } }
+
+
+      for (const t of transactions) {
+
+        const cat = t.category.trim();
+
+        const am = parseFloat(t.amount);
+
+        if (t.type === 'Income') {
+
+          totalIncome += am;
+
+          breakdown[cat] = breakdown[cat] || { Income: 0, Expense: 0 };
+
+          breakdown[cat].Income += am;
+
+        } else if(t.type === 'Expense'){
+
+          totalExpense += am;
+
+          breakdown[cat] = breakdown[cat] || { Income: 0, Expense: 0 };
+
+          breakdown[cat].Expense += am;
+
+        }
+
+      }
+
+
+      // Overall summary
+
+      overallSummaryList.innerHTML = '';
+
+      const headingItems = [
+
+        {label: 'Total Income', value: totalIncome, color: 'green'},
+
+        {label: 'Total Expense', value: totalExpense, color: 'crimson'},
+
+        {label: 'Balance', value: totalIncome - totalExpense, color: (totalIncome - totalExpense) >= 0 ? 'green' : 'crimson'},
+
+      ];
+
+      for(const item of headingItems){
+
+        const li = document.createElement('li');
+
+        li.textContent = item.label;
+
+        const spanVal = document.createElement('span');
+
+        spanVal.textContent = item.value.toFixed(2) + ' USD';
+
+        spanVal.style.color = item.color;
+
+        li.appendChild(spanVal);
+
+        overallSummaryList.appendChild(li);
+
+      }
+
+
+      // Category & Type summary
+
+      categorySummaryList.innerHTML = '';
+
+      const categories = Object.keys(breakdown).sort((a,b) => a.localeCompare(b));
+
+      if(categories.length === 0){
+
+        const li = document.createElement('li');
+
+        li.textContent = 'No categories to summarize.';
+
+        categorySummaryList.appendChild(li);
+
+        return;
+
+      }
+
+      for (const cat of categories) {
+
+        const catData = breakdown[cat];
+
+        const li = document.createElement('li');
+
+        li.style.flexDirection = 'column';
+
+        li.style.alignItems = 'flex-start';
+
+
+        const catTitle = document.createElement('div');
+
+        catTitle.textContent = cat;
+
+        catTitle.style.fontWeight = '700';
+
+        li.appendChild(catTitle);
+
+
+        // Income and Expense amounts for that category
+
+        const incExpDiv = document.createElement('div');
+
+        incExpDiv.style.display = 'flex';
+
+        incExpDiv.style.justifyContent = 'space-between';
+
+        incExpDiv.style.width = '100%';
+
+        incExpDiv.style.maxWidth = '320px';
+
+
+        const incSpan = document.createElement('span');
+
+        incSpan.textContent = 'Income: ' + catData.Income.toFixed(2) + ' USD';
+
+        incSpan.style.color = 'green';
+
+        incSpan.style.fontWeight = '600';
+
+
+        const expSpan = document.createElement('span');
+
+        expSpan.textContent = 'Expense: ' + catData.Expense.toFixed(2) + ' USD';
+
+        expSpan.style.color = 'crimson';
+
+        expSpan.style.fontWeight = '600';
+
+
+        incExpDiv.appendChild(incSpan);
+
+        incExpDiv.appendChild(expSpan);
+
+
+        li.appendChild(incExpDiv);
+
+
+        categorySummaryList.appendChild(li);
+
+      }
+
+    }
+
+
+    function deleteTransaction(transaction) {
+
+      const index = transactions.findIndex(t =>
+
+        t.date === transaction.date &&
+
+        t.category === transaction.category &&
+
+        t.item === transaction.item &&
+
+        t.amount === transaction.amount &&
+
+        t.type === transaction.type
+
+      );
+
+      if(index > -1){
+
+        transactions.splice(index,1);
+
+        saveTransactions();
+
+        renderCategories();
+
+        renderTransactions();
+
+        renderSummary();
+
+      }
+
+    }
+
+
+    form.addEventListener('submit', e => {
+
+      e.preventDefault();
+
+      const dateVal = dateInput.value.trim();
+
+      const typeVal = typeInput.value;
+
+      const categoryVal = categoryInput.value.trim();
+
+      const itemVal = itemInput.value.trim();
+
+      const amountVal = amountInput.value.trim();
+
+
+      if(!dateVal || !typeVal || !categoryVal || !itemVal || !amountVal){
+
+        alert('Please fill out all fields including Type.');
+
+        return;
+
+      }
+
+      if(isNaN(amountVal) || parseFloat(amountVal) <= 0){
+
+        alert('Please enter a valid positive amount.');
+
+        return;
+
+      }
+
+
+      transactions.push({
+
+        date: dateVal,
+
+        type: typeVal,
+
+        category: categoryVal,
+
+        item: itemVal,
+
+        amount: parseFloat(amountVal).toFixed(2)
+
+      });
+
+
+      // After adding, reset form and sort descending by date
+
+      currentSort = { column: 'date', ascending: false };
+
+      saveTransactions();
+
+      renderCategories();
+
+      renderTransactions();
+
+      renderSummary();
+
+      form.reset();
+
+      dateInput.focus();
+
+    });
+
+
+    downloadBtn.addEventListener('click', () => {
+
+      if(transactions.length === 0){
+
+        alert('No transactions to download.');
+
+        return;
+
+      }
+
+      const headers = ['Date','Type','Category','Item','Amount'];
+
+      let csvContent = headers.join(',') + '\n';
+
+      for(const t of transactions){
+
+        const row = [
+
+          t.date,
+
+          t.type,
+
+          `"${t.category.replace(/"/g,'""')}"`,
+
+          `"${t.item.replace(/"/g,'""')}"`,
+
+          t.amount
+
+        ];
+
+        csvContent += row.join(',') + '\n';
+
+      }
+
+      const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+
+      a.href = url;
+
+      a.download = 'transactions.csv';
+
+      a.style.display = 'none';
+
+      document.body.appendChild(a);
+
+      a.click();
+
+      setTimeout(() => {
+
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+
+      }, 100);
+
+    });
+
+
+    clearBtn.addEventListener('click', () => {
+
+      if(confirm('Are you sure you want to clear all transactions? This action cannot be undone.')){
+
+        transactions = [];
+
+        saveTransactions();
+
+        renderCategories();
+
+        renderTransactions();
+
+        renderSummary();
+
+      }
+
+    });
+
+
+    // Sorting by columns
+
+    table.querySelectorAll('th[data-sort]').forEach(th => {
+
+      th.style.cursor = 'pointer';
+
+      th.addEventListener('click', () => {
+
+        const column = th.getAttribute('data-sort');
+
+        if(currentSort.column === column){
+
+          currentSort.ascending = !currentSort.ascending;
+
+        } else {
+
+          currentSort.column = column;
+
+          currentSort.ascending = true;
+
+        }
+
+        renderTransactions();
+
+      });
+
+    });
+
+
+    init();
+
+  })();
+
+</script>
+
+</body>
+
+</html>
